@@ -151,6 +151,6 @@ make test
 ## 👨‍💻 Maintainers
 
 * Arjun Singh 
-* Team/CodeNeeTi
+* Team/ArjunDev17
 
 
