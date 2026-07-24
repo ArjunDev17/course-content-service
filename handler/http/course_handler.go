@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/ArjunDev17/course-content-service/model"
-	mongo_repo "github.com/ArjunDev17/course-content-service/repository/mongo"
 	course_svc "github.com/ArjunDev17/course-content-service/service/course"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,10 +16,10 @@ type CourseHandler struct {
 	service course_svc.Service
 }
 
-func NewCourseHandler() *CourseHandler {
-	repo := mongo_repo.NewCourseRepository()
-	svc := course_svc.NewCourseService(repo)
-	return &CourseHandler{service: svc}
+func NewCourseHandler(service course_svc.Service) *CourseHandler {
+	return &CourseHandler{
+		service: service,
+	}
 }
 
 // Register routes in router
