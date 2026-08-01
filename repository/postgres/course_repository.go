@@ -1,36 +1,30 @@
-package repository
+package postgres
 
 import (
 	"context"
 
 	"github.com/ArjunDev17/course-content-service/internal/database"
 	"github.com/ArjunDev17/course-content-service/domain"
+	courseservice "github.com/ArjunDev17/course-content-service/service/course"
 )
 
-type CourseRepository interface {
-	Create(
-		ctx context.Context,
-		course *model.Course,
-	) (*model.Course, error)
-}
-
-type courseRepository struct {
+type repository struct {
 	db *database.PostgreSQL
 }
 
-func NewCourseRepository(
+func New(
 	db *database.PostgreSQL,
-) CourseRepository {
+) courseservice.Repository {
 
-	return &courseRepository{
+	return &repository{
 		db: db,
 	}
 }
 
-func (r *courseRepository) Create(
+func (r *repository) Create(
 	ctx context.Context,
-	course *model.Course,
-) (*model.Course, error) {
+	course *domain.Course,
+) error {
 
 	query := `
 	INSERT INTO courses
@@ -53,7 +47,7 @@ func (r *courseRepository) Create(
 		updated_at;
 	`
 
-	err := r.db.Pool.QueryRow(
+	return r.db.Pool.QueryRow(
 		ctx,
 		query,
 		course.Title,
@@ -65,10 +59,4 @@ func (r *courseRepository) Create(
 		&course.CreatedAt,
 		&course.UpdatedAt,
 	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return course, nil
 }

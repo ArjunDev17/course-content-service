@@ -12,6 +12,11 @@ import (
 
 	"github.com/ArjunDev17/course-content-service/internal/config"
 	"github.com/ArjunDev17/course-content-service/internal/database"
+	"github.com/ArjunDev17/course-content-service/internal/router"
+	"github.com/ArjunDev17/course-content-service/repository/postgres"
+	"github.com/ArjunDev17/course-content-service/service/course"
+
+	httphandler "github.com/ArjunDev17/course-content-service/handler/http"
 )
 
 type Application struct {
@@ -37,8 +42,16 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
+	repo := postgres.New(db)
+
+	courseService := course.New(repo)
+
+	courseHandler := httphandler.NewCourseHandler(courseService)
+
+	engine := router.NewRouter(courseHandler)
 	server := &http.Server{
-		Addr: ":" + cfg.App.Port,
+		Addr:    ":" + cfg.App.Port,
+		Handler: engine,
 	}
 
 	return &Application{

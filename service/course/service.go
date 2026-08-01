@@ -1,17 +1,31 @@
 package course
 
-type Service struct {
+import (
+	"context"
+
+	"github.com/ArjunDev17/course-content-service/domain"
+)
+
+type CourseService struct {
 	repository Repository
-	publisher  EventPublisher
 }
 
 func New(
 	repository Repository,
-	publisher EventPublisher,
-) *Service {
-
-	return &Service{
+) *CourseService {
+	return &CourseService{
 		repository: repository,
-		publisher:  publisher,
 	}
+}
+
+func (s *CourseService) Create(
+	ctx context.Context,
+	course *domain.Course,
+) (*domain.Course, error) {
+
+	if err := s.repository.Create(ctx, course); err != nil {
+		return nil, err
+	}
+
+	return course, nil
 }
