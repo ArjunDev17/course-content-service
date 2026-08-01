@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,113 +9,67 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ArjunDev17/course-content-service/config"
-	httpHandler "github.com/ArjunDev17/course-content-service/handler/http"
-	"github.com/ArjunDev17/course-content-service/pkg/db"
-	mongoRepo "github.com/ArjunDev17/course-content-service/repository/mongo"
-	"github.com/ArjunDev17/course-content-service/server/api"
-	courseService "github.com/ArjunDev17/course-content-service/service/course"
+	"github.com/ArjunDev17/course-content-service/internal/config"
+	"github.com/ArjunDev17/course-content-service/internal/database"
 )
 
 func main() {
 
-	// ----------------------------
-	// Load Configuration
-	// ----------------------------
-	configPath := "config/config.yaml"
+	// Load application configuration
+	cfg := config.Load()
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		configPath = ""
-	}
-
-	if configPath != "" {
-		config.LoadConfig(configPath)
-	}
-
-	// ----------------------------
-	// Connect MongoDB
-	// ----------------------------
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-
-	client, err := db.ConnectMongo(ctx)
+	// Initialize PostgreSQL
+	db, err := database.New(cfg.Database)
 	if err != nil {
-		log.Fatalf("failed to connect mongo: %v", err)
+		log.Fatalf("failed to initialize postgres: %v", err)
 	}
+	defer db.Close()
 
-	db.Client = client
+	log.Println("✅ PostgreSQL connected successfully")
 
-	// ----------------------------
-	// Dependency Injection
-	// ----------------------------
-
-	// Repository
-	courseRepo := mongoRepo.NewCourseRepository()
-
-	// Service
-	courseSvc := courseService.NewCourseService(courseRepo)
-
-	// Handlers
-	courseHandler := httpHandler.NewCourseHandler(courseSvc)
-	healthHandler := httpHandler.NewHealthHandler()
-
-	// ----------------------------
-	// Router
-	// ----------------------------
-	router := api.NewRouter(
-		courseHandler,
-		healthHandler,
-	)
-
-	port := fmt.Sprintf(":%d", config.Cfg.Server.Port)
-
+	// Temporary HTTP server
 	server := &http.Server{
-		Addr:    port,
-		Handler: router,
+		Addr: ":" + cfg.App.Port,
 	}
 
-	// ----------------------------
-	// Start Server
-	// ----------------------------
+	// Start server in separate goroutine
 	go func() {
-		log.Printf("Server started on %s", port)
+		log.Printf("🚀 Server started on port %s", cfg.App.Port)
 
 		if err := server.ListenAndServe(); err != nil &&
 			err != http.ErrServerClosed {
-
-			log.Fatalf("server error: %v", err)
+			log.Fatalf("server failed: %v", err)
 		}
 	}()
 
-	// ----------------------------
-	// Graceful Shutdown
-	// ----------------------------
-	quit := make(chan os.Signal, 1)
+	// Wait for shutdown signal
+	waitForShutdown(server)
+}
+
+func waitForShutdown(server *http.Server) {
+
+	stop := make(chan os.Signal, 1)
 
 	signal.Notify(
-		quit,
+		stop,
 		syscall.SIGINT,
 		syscall.SIGTERM,
 	)
 
-	<-quit
+	<-stop
 
-	log.Println("Shutting down server...")
+	log.Println("Shutdown signal received...")
 
-	ctxShutdown, cancelShutdown := context.WithTimeout(
+	ctx, cancel := context.WithTimeout(
 		context.Background(),
 		10*time.Second,
 	)
 
-	defer cancelShutdown()
+	defer cancel()
 
-	if err := server.Shutdown(ctxShutdown); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
+	if err := server.Shutdown(ctx); err != nil {
+		log.Printf("graceful shutdown failed: %v", err)
 	}
 
-	if err := client.Disconnect(ctxShutdown); err != nil {
-		log.Printf("Mongo disconnect error: %v", err)
-	}
-
-	log.Println("Server exited successfully")
+	log.Println("Application stopped.")
 }

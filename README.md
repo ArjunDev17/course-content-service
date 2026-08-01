@@ -154,3 +154,39 @@ make test
 * Team/ArjunDev17
 
 
+# Kafka Learning Roadmap
+
+This repository is being enhanced step by step into a production-ready Event-Driven microservice.
+
+## Phase 1 - Kafka Producer ✅
+- Create Course API
+- Store Course in MongoDB
+- Publish `course.created` event to Kafka
+- Understand Producers, Topics, and Event Contracts
+
+## Phase 2
+- Notification Service (Kafka Consumer)
+
+## Phase 3
+- Subscriber Management
+
+## Phase 4
+- Notification Worker Pool
+
+## Phase 5
+- Retry Topics
+
+## Phase 6
+- Dead Letter Topic (DLT)
+
+## Phase 7
+- Consumer Groups
+
+## Phase 8
+- Partitions
+
+## Phase 9
+- Ordering Guarantees
+
+## Phase 10
+- Production Deployment
