@@ -1,0 +1,53 @@
+# Parameter
+{
+  "stngw_id": "STN-NDLS-001",
+  "timestamp": 1718875400000,
+  "packet_type": "PARAMETER_DELTA",
+  "data": [
+    {
+      "para_id": "V_DC_MAIN",
+      "val": 23.8 
+    },
+    {
+      "para_id": "TRK_CIRCUIT_101_STATUS",
+      "val": 0 
+    }
+  ]
+}
+# Health
+{
+  "stngw_id": "STN-NDLS-001",
+  "timestamp": 1718877200000,
+  "packet_type": "GATEWAY_HEALTH",
+  "diagnostics": {
+    "uptime_seconds": 345600,
+    "cpu_utilization_pct": 42,
+    "ram_utilization_pct": 55,
+    "network_rssi_dbm": -68,
+    "buffered_events_count": 0
+  },
+  "sensor_faults": [
+    {
+      "sensor_id": "SENS-TEMP-04",
+      "error_code": "DISCONNECTED"
+    }
+  ]
+}
+# burst data
+{
+  "stngw_id": "STN-NDLS-001",
+  "timestamp": 1718876000000,
+  "packet_type": "BURST_EVENT",
+  "asset_id": "PT-201A",
+  "event_type": "POINT_OPERATION",
+  "metadata": {
+    "duration_ms": 3200,
+    "sample_interval_ms": 20,
+    "total_samples": 160
+  },
+  "samples": {
+    "current_amps_phase_1": [1.1, 4.5, 7.2, 7.8, 6.1, 4.2, 4.0, 3.8], 
+    "voltage_dc": [110, 105, 102, 102, 104, 108, 109, 110]
+    // Note: In reality, these arrays contain ~160 to 250 values each.
+  }
+}
