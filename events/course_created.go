@@ -7,9 +7,9 @@ type CourseCreatedEvent struct {
 	EventType  string    `json:"event_type"`
 	OccurredAt time.Time `json:"occurred_at"`
 
-	CourseID   string `json:"course_id"`
-	Title      string `json:"title"`
+	CourseID    string `json:"course_id"`
+	Title       string `json:"title"`
 	Description string `json:"description"`
-	Category   string `json:"category"`
-	Instructor string `json:"instructor"`
+	Category    string `json:"category"`
+	Instructor  string `json:"instructor"`
 }
