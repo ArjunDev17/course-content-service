@@ -5,12 +5,6 @@ import (
 	"os"
 )
 
-type Config struct {
-	App      AppConfig
-	Database DatabaseConfig
-	Kafka    KafkaConfig
-}
-
 type AppConfig struct {
 	Name string
 	Port string
@@ -27,6 +21,12 @@ type DatabaseConfig struct {
 
 type KafkaConfig struct {
 	Brokers []string
+}
+
+type Config struct {
+	App      AppConfig
+	Database DatabaseConfig
+	Kafka    KafkaConfig
 }
 
 func Load() *Config {
@@ -48,7 +48,7 @@ func Load() *Config {
 
 		Kafka: KafkaConfig{
 			Brokers: []string{
-				getEnv("KAFKA_BROKER", "localhost:9092"),
+				getEnv("KAFKA_BROKER", "localhost:29092"),
 			},
 		},
 	}

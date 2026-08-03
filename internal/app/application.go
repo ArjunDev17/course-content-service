@@ -12,6 +12,7 @@ import (
 
 	"github.com/ArjunDev17/course-content-service/internal/config"
 	"github.com/ArjunDev17/course-content-service/internal/database"
+	"github.com/ArjunDev17/course-content-service/internal/kafka"
 	"github.com/ArjunDev17/course-content-service/internal/router"
 	"github.com/ArjunDev17/course-content-service/repository/postgres"
 	"github.com/ArjunDev17/course-content-service/service/course"
@@ -42,10 +43,16 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
-	repo := postgres.New(db)
+	producer := kafka.NewProducer(cfg.Kafka.Brokers)
 
-	courseService := course.New(repo)
+	publisher := kafka.NewPublisher(producer)
 
+	repository := postgres.New(db)
+
+	courseService := course.New(
+		repository,
+		publisher,
+	)
 	courseHandler := httphandler.NewCourseHandler(courseService)
 
 	engine := router.NewRouter(courseHandler)
