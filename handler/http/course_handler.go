@@ -8,19 +8,22 @@ import (
 	"github.com/ArjunDev17/course-content-service/domain"
 	requestdto "github.com/ArjunDev17/course-content-service/handler/http/request"
 	responsedto "github.com/ArjunDev17/course-content-service/handler/http/response"
-	courseservice "github.com/ArjunDev17/course-content-service/service/course"
+	// "github.com/ArjunDev17/course-content-service/internal/usecase/course"
+
+		courseusecase "github.com/ArjunDev17/course-content-service/internal/usecase/course"
+
+
 )
 
 type CourseHandler struct {
-	service *courseservice.CourseService
+	createCourseUseCase *courseusecase.CreateCourseUseCase
 }
-
 func NewCourseHandler(
-	service *courseservice.CourseService,
+	createCourseUseCase *courseusecase.CreateCourseUseCase,
 ) *CourseHandler {
 
 	return &CourseHandler{
-		service: service,
+		createCourseUseCase: createCourseUseCase,
 	}
 }
 
@@ -47,10 +50,10 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 		Instructor:  req.Instructor,
 	}
 
-	savedCourse, err := h.service.Create(
-		c.Request.Context(),
-		course,
-	)
+	savedCourse, err := h.createCourseUseCase.Execute(
+	c.Request.Context(),
+	course,
+)
 
 	if err != nil {
 

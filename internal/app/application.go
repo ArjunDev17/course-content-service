@@ -15,9 +15,9 @@ import (
 	"github.com/ArjunDev17/course-content-service/internal/kafka"
 	"github.com/ArjunDev17/course-content-service/internal/router"
 	"github.com/ArjunDev17/course-content-service/repository/postgres"
-	"github.com/ArjunDev17/course-content-service/service/course"
 
 	httphandler "github.com/ArjunDev17/course-content-service/handler/http"
+	courseusecase "github.com/ArjunDev17/course-content-service/internal/usecase/course"
 )
 
 type Application struct {
@@ -45,15 +45,18 @@ func New() (*Application, error) {
 
 	producer := kafka.NewProducer(cfg.Kafka.Brokers)
 
+	repo := postgres.New(db)
+
 	publisher := kafka.NewPublisher(producer)
 
-	repository := postgres.New(db)
-
-	courseService := course.New(
-		repository,
+	createCourseUseCase := courseusecase.NewCreateCourseUseCase(
+		repo,
 		publisher,
 	)
-	courseHandler := httphandler.NewCourseHandler(courseService)
+
+	courseHandler := httphandler.NewCourseHandler(
+		createCourseUseCase,
+	)
 
 	engine := router.NewRouter(courseHandler)
 	server := &http.Server{

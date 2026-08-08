@@ -14,7 +14,7 @@ func ToCourseCreatedEvent(
 
 	return events.CourseCreatedEvent{
 		EventID:    uuid.NewString(),
-		EventType:  constants.CourseCreatedTopic,
+		EventType:  constants.CourseCreatedEventType,
 		OccurredAt: course.CreatedAt,
 
 		CourseID:    course.ID,
