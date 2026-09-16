@@ -8,6 +8,7 @@ import (
 
 func NewRouter(
 	courseHandler *httphandler.CourseHandler,
+	healthHandler *httphandler.HealthHandler,
 ) *gin.Engine {
 
 	router := gin.Default()
@@ -17,6 +18,8 @@ func NewRouter(
 	{
 		api.POST("/courses", courseHandler.CreateCourse)
 	}
+
+	router.GET("/health", healthHandler.Health)
 
 	return router
 }

@@ -12,11 +12,12 @@ import (
 
 	"github.com/ArjunDev17/course-content-service/internal/config"
 	"github.com/ArjunDev17/course-content-service/internal/database"
+	"github.com/ArjunDev17/course-content-service/internal/kafka"
 	"github.com/ArjunDev17/course-content-service/internal/router"
 	"github.com/ArjunDev17/course-content-service/repository/postgres"
-	"github.com/ArjunDev17/course-content-service/service/course"
 
 	httphandler "github.com/ArjunDev17/course-content-service/handler/http"
+	courseusecase "github.com/ArjunDev17/course-content-service/internal/usecase/course"
 )
 
 type Application struct {
@@ -42,13 +43,31 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
+	producer := kafka.NewProducer(cfg.Kafka.Brokers)
+
 	repo := postgres.New(db)
 
-	courseService := course.New(repo)
+	publisher := kafka.NewPublisher(producer)
 
-	courseHandler := httphandler.NewCourseHandler(courseService)
+	createCourseUseCase := courseusecase.NewCreateCourseUseCase(
+		repo,
+		publisher,
+	)
 
-	engine := router.NewRouter(courseHandler)
+	// Course Handler
+	courseHandler := httphandler.NewCourseHandler(
+		createCourseUseCase,
+	)
+
+	// Health Handler
+	healthHandler := httphandler.NewHealthHandler()
+
+	// Router
+	engine := router.NewRouter(
+		courseHandler,
+		healthHandler,
+	)
+
 	server := &http.Server{
 		Addr:    ":" + cfg.App.Port,
 		Handler: engine,
