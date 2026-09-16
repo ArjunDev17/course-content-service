@@ -54,11 +54,20 @@ func New() (*Application, error) {
 		publisher,
 	)
 
+	// Course Handler
 	courseHandler := httphandler.NewCourseHandler(
 		createCourseUseCase,
 	)
 
-	engine := router.NewRouter(courseHandler)
+	// Health Handler
+	healthHandler := httphandler.NewHealthHandler()
+
+	// Router
+	engine := router.NewRouter(
+		courseHandler,
+		healthHandler,
+	)
+
 	server := &http.Server{
 		Addr:    ":" + cfg.App.Port,
 		Handler: engine,
